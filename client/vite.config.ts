@@ -6,6 +6,6 @@ export default defineConfig({
   base: '/p36/',
   plugins: [react(), tailwindcss()],
   build: {
-    outDir: "docs"
+    outDir: "../docs"
   }
 })
