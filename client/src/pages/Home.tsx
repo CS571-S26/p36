@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import puzzle from "../assets/puzzle.png";
-import FeatureCard from "../components/FeatureCard";
+import { FeatureCard } from "../components/shared";
 import { Brain, Star, Lightbulb } from "lucide-react";
 
 function Home() {

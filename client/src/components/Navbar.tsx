@@ -22,7 +22,7 @@ function Navbar() {
 
           <div className="flex gap-12 font-semibold text-gray-600">
 
-            <Link to="#"
+            <Link to="/trending"
               className="flex items-center gap-2 hover:text-sky-700 transition"
             >
               <TrendingUp className="w-5 h-5"/>
