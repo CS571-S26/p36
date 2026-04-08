@@ -52,7 +52,7 @@ function Home() {
                   Start Building
                 </Link>
 
-                <Link to="#" className="w-fit rounded-2xl border-2 border-gray-300 font-medium px-6 py-4 hover:border-gray-400">
+                <Link to="/comps" className="w-fit rounded-2xl border-2 border-gray-300 font-medium px-6 py-4 hover:border-gray-400">
                   View Comps
                 </Link>
 

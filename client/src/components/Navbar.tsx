@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import AuthModal from "./auth/AuthModal";
 import { useAuth } from "./contexts/AuthContext";
@@ -22,14 +22,13 @@ function Navbar() {
 
           <div className="flex gap-12 font-semibold text-gray-600">
 
-            <Link to="/trending"
+            <Link to="/comps"
               className="flex items-center gap-2 hover:text-sky-700 transition"
             >
-              <TrendingUp className="w-5 h-5"/>
-              Trending
+              Comps
             </Link>
 
-            <Link to="#"
+            <Link to="/build-comp"
               className="flex items-center gap-2 hover:text-sky-700 transition"
             >
               Build Comps

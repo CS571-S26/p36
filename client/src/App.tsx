@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import Trending from "./pages/Trending";
+import AllComps from "./pages/AllComps";
+import BuildComp from "./pages/BuildComp";
 import { Routes, Route } from "react-router-dom";
 
 function App() {
@@ -10,7 +11,9 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/trending" element={<Trending />} />
+        <Route path="/comps" element={<AllComps />} />
+        <Route path="/comps/:compId" element={<AllComps />} />
+        <Route path="/build-comp" element={<BuildComp />} />
       </Routes>
     </div>
   )
