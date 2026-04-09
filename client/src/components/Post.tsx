@@ -1,4 +1,4 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, User } from "lucide-react";
 import { CompBoard, HexagonFrame } from "./comps/Board";
 import { frameColor } from "../utils/frameColor";
 import { DateTime } from "luxon";
@@ -21,7 +21,7 @@ export const Post = ({
     createdAt: string;
     heartCount: number;
     commentCount: number;
-    comments: { username: string; content: string }[];
+    comments: { username: string; content: string; createdAt: string }[];
   };
   activeCompId: string | null;
 }) => {
@@ -68,7 +68,7 @@ export const Post = ({
         >
           <div>
             <h3 className="font-bold text-lg">{compSpec.title}</h3>
-            <p className="text-sm text-gray-600 font-light">
+            <p className="text-sm text-gray-600 font-normal">
               {compSpec.username} • {formatDate(compSpec.createdAt)}
             </p>
           </div>
@@ -102,7 +102,7 @@ export const Post = ({
             {/* Tips */}
             <div className="flex flex-col gap-2 p-4 items-center rounded-xl border border-2 border-gray-300 border-xl">
               <h3 className="text-sm font-bold">Tips</h3>
-              <p className="text-sm font-light">{compSpec.tips}</p>
+              <p className="text-sm font-normal">{compSpec.tips}</p>
             </div>
 
             {/* Board positioning */}
@@ -116,7 +116,7 @@ export const Post = ({
             {/* How to Transition */}
             <div className="flex flex-col gap-2 p-4 items-center rounded-xl border border-2 border-gray-300 border-xl mb-2">
               <h3 className="text-sm font-bold">How to Transition</h3>
-              <p className="text-sm font-light">{compSpec.howToTransition}</p>
+              <p className="text-sm font-normal">{compSpec.howToTransition}</p>
             </div>
 
             {/* Comment Section */}
@@ -124,7 +124,7 @@ export const Post = ({
               <p className="text-md font-bold py-4">
                 Comments ({commentCount})
               </p>
-              <div className="flex gap-8">
+              <div className="flex gap-8 mb-4">
                 <textarea
                   ref={commentRef}
                   className="w-full border border-gray-300 rounded-xl p-2 text-sm font-light focus:outline-none"
@@ -137,12 +137,21 @@ export const Post = ({
                   Post
                 </button>
               </div>
-              {comments.map((comment) => (
-                <div className="bg-gray-50 border border-gray-200">
-                  {comment.username}
-                  {comment.content}
-                </div>
-              ))}
+              <div className="space-y-2">
+                {comments.map((comment) => (
+                  <div 
+                    
+                    className="bg-gray-50 border border-gray-200 rounded-xl p-4"
+                  >
+                    <div className="flex items-center gap-2 font-bold text-sm mb-2">
+                      <User size={16}/>
+                      {comment.username}
+                      <p className="text-gray-500 text-xs font-normal">{comment.createdAt.slice(0, 10)}</p>
+                    </div>
+                    <p className="text-sm font-light">{comment.content}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
