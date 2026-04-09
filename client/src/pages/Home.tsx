@@ -48,7 +48,7 @@ function Home() {
 
               <div className="flex gap-4 mt-6 items-center">
 
-                <Link to="#" className="w-fit rounded-2xl bg-amber-400 text-white font-medium px-6 py-4 hover:bg-amber-500">
+                <Link to="/build-comp" className="w-fit rounded-2xl bg-amber-400 text-white font-medium px-6 py-4 hover:bg-amber-500">
                   Start Building
                 </Link>
 

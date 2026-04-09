@@ -1,34 +1,43 @@
 import { Heart, MessageCircle } from "lucide-react";
-import { useState, useEffect } from 'react';
 import { CompBoard, HexagonFrame } from './comps/Board';
+import { frameColor } from '../utils/frameColor';
+import { DateTime } from 'luxon';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const Post = ({ compSpec, activeCompId }: { 
   compSpec: {
-    compId: number;
+    _id: string;
     title: string;
     username: string;
-    champions: { championName: string; championImg: string; frameColor: string; }[];
+    champions: { championName: string; championImg: string; cost: number; }[];
     tips: string;
     howToTransition: string,
     createdAt: string;
     heartCount: number;
-    commentCount: number;};
-  activeCompId: number | null;
+    commentCount: number;
+    comments: { username: string; content: string; }[];
+  };
+  activeCompId: string | null;
   }) => {
     const champions = compSpec.champions;
     const navigate = useNavigate();
-    const [expanded, setExpanded] = useState(activeCompId === compSpec.compId);
+    const [expanded, setExpanded] = useState(activeCompId === compSpec._id);
 
     useEffect(() => {
-      setExpanded(activeCompId === compSpec.compId);
-    }, [activeCompId, compSpec.compId]);
+      setExpanded(activeCompId === compSpec._id);
+    }, [activeCompId, compSpec._id]);
 
     const handleToggle = () => {
       const next = !expanded;
-      navigate(next ? `/comps/${compSpec.compId}` : '/comps');
+      navigate(next ? `/comps/${compSpec._id}` : '/comps');
       setExpanded(next);
     };
+
+    const formatDate = (dateStr: string) => {
+      return DateTime.fromISO(dateStr).toLocaleString(DateTime.DATE_MED);
+    }
     
     return (
       <div className="max-w-5xl mx-auto">
@@ -41,7 +50,7 @@ export const Post = ({ compSpec, activeCompId }: {
           >
             <div>
               <h3 className="font-bold text-lg">{compSpec.title}</h3>
-              <p className="text-sm text-gray-600 font-light">{compSpec.username} • {compSpec.createdAt}</p>
+              <p className="text-sm text-gray-600 font-light">{compSpec.username} • {formatDate(compSpec.createdAt)}</p>
             </div>
             <div className="flex gap-4 font-normal">
               <span className="flex gap-2">
@@ -61,7 +70,7 @@ export const Post = ({ compSpec, activeCompId }: {
                 <HexagonFrame key={i}
                   src={champion.championImg}
                   alt={champion.championName}
-                  frameColor={champion.frameColor}
+                  frameColor={frameColor(champion.cost)}
                 />
               ))}
             </div>
