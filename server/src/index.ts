@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import { syncChampions } from './services/ddragon';
 import championRoutes from './routes/champions';
-import compRoutes from './routes/comps';
+import compRoutes from './routes/posts';
 import cors from 'cors';
 
 // reads .env file and loads values into process.env

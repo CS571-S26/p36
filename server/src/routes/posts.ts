@@ -93,6 +93,32 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/comps/:id/comments - add a comment
+router.post('/:id/comments', async (req: Request, res: Response) => {
+  try {
+    const { username, content } = req.body;
+
+    if (!username || !content) {
+      return res.status(400).json({ message: 'username and content are required.' });
+    }
+
+    const comp = await Comp.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: { comments: { username, content } },
+        $inc: { commentCount: 1 }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!comp) return res.status(404).json({ message: 'Comp not found.' });
+
+    res.status(201).json(comp.comments);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to add comment.' });
+  }
+})
+
 // DELETE /api/comps/:id - delete a comp
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
@@ -104,6 +130,6 @@ router.delete('/:id', async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to delete comp.' });
   }
-})
+});
 
 export default router;

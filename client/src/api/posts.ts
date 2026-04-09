@@ -8,3 +8,8 @@ export const getAllComps = async (sort?: 'mostLiked' | 'recent') => {
   });
   return data;
 };
+
+export const postComment = async (compId: string, username: string, content: string) => {
+  const { data } = await axios.post(`${API_URL}/comps/${compId}/comments`, { username, content });
+  return data;
+}
