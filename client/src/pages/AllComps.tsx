@@ -24,9 +24,19 @@ export default function AllComps() {
         </button>
 
         {filterExpanded && (
-          <div className="absolute top-10 right-0 bg-white rounded-xl px-4 py-2 text-sm text-gray-700 hover:cursor-pointer">
-            <button onClick={() => { setSort('mostLiked'); setFilterExpanded(false); }}>Most Liked</button>
-            <button onClick={() => { setSort('recent'); setFilterExpanded(false); }}>Recently created</button>
+          <div className="absolute top-12 right-0 bg-white rounded-xl shadow-md border border-gray-200 w-40">
+            <button 
+              onClick={() => { setSort('mostLiked'); setFilterExpanded(false); }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 font-normal hover:bg-gray-100"
+            >
+              Most Liked
+            </button>
+            <button 
+              onClick={() => { setSort('recent'); setFilterExpanded(false); }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 font-normal hover:bg-gray-100"
+            >
+              Recently created
+            </button>
           </div>
         )}
       </div>
