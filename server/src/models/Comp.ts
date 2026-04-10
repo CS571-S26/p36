@@ -34,7 +34,6 @@ const CompSchema = new Schema<IComp>(
     commentCount: { type: Number, default: 0 },
     comments: [
       {
-        _id: false,
         username: { type: String, required: true },
         content: { type: String, required: true },
         createdAt: { type: Date, default: Date.now },

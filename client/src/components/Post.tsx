@@ -21,15 +21,19 @@ export const Post = ({
     createdAt: string;
     heartCount: number;
     commentCount: number;
-    comments: { username: string; content: string; createdAt: string }[];
+    comments: { _id: string; username: string; content: string; createdAt: string }[];
   };
   activeCompId: string | null;
 }) => {
+  const COMMENTS_PER_PAGE = 5;
   const champions = compSpec.champions;
-  const navigate = useNavigate();
+
   const [expanded, setExpanded] = useState(activeCompId === compSpec._id);
   const [comments, setComments] = useState(compSpec.comments);
   const [commentCount, setCommentCount] = useState(compSpec.commentCount);
+  const [currentCommentPg, setCurrentCommentPg] = useState(1);
+  
+  const navigate = useNavigate();
   const commentRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -140,7 +144,7 @@ export const Post = ({
               <div className="space-y-2">
                 {comments.map((comment) => (
                   <div 
-                    
+                    key={comment._id}
                     className="bg-gray-50 border border-gray-200 rounded-xl p-4"
                   >
                     <div className="flex items-center gap-2 font-bold text-sm mb-2">
