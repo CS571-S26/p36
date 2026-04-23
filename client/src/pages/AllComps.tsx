@@ -2,16 +2,18 @@ import { Post } from "../components/Post";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getAllComps } from "../api/posts";
+import { useAuth } from "../components/contexts/AuthContext";
 
 export default function AllComps() {
   const { compId } = useParams();
+  const { user } = useAuth();
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [comps, setComps] = useState([]);
   const [sort, setSort] = useState<"mostLiked" | "recent">("mostLiked");
 
   useEffect(() => {
-    getAllComps(sort).then(setComps);
-  }, [sort]);
+    getAllComps(sort, user ?? undefined).then(setComps);
+  }, [sort, user]);
 
   return (
     <div className="mt-8 space-y-4 ">
@@ -48,7 +50,7 @@ export default function AllComps() {
       </div>
 
       {comps.map((comp: any) => (
-        <Post key={comp._id} compSpec={comp} activeCompId={compId ?? null} />
+        <Post key={comp._id} compSpec={comp} activeCompId={compId ?? null} basePath="/comps" />
       ))}
     </div>
   );

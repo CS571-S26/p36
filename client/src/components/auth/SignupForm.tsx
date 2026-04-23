@@ -1,27 +1,31 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { registerUser } from "../../api/auth";
 
-type LoginFormProps = {
-  toLogin: () => void;
-};
-
-function SignupForm({ toLogin }: LoginFormProps) {
+function SignupForm({ toLogin, onClose }: { toLogin: () => void; onClose: () => void; }) {
   const navigate = useNavigate();
   const usernameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const pwConfirmRef = useRef<HTMLInputElement>(null);
   const { login } = useAuth();
-
   const [error, setError] = useState("");
 
-  function handleSignup() {
+  const handleSignup = async () => {
     const username = usernameRef.current?.value;
+    const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
     const pwConfirm = pwConfirmRef.current?.value;
 
-    if (!username || !password || !pwConfirm) {
+    if (!username || !email || !password || !pwConfirm) {
       setError("Please fill out all fields.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email!)) {
+      setError("Please enter a valid email address.");
       return;
     }
 
@@ -35,30 +39,40 @@ function SignupForm({ toLogin }: LoginFormProps) {
       return;
     }
 
-    // POST request
-
-    setError("");
-    login(username); // logs in after signup
-    navigate("/");
+    try {
+      const data = await registerUser(username, email, password);
+      setError("");
+      login(data.username, data.token);
+      onClose();
+      navigate("/");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Signup failed.");
+    }
   }
 
   return (
     <div className="text-gray-700">
-      <h2 className="text-2xl font-medium mb-8 text-center">Create your <br/> CompShare Account</h2>
+      <h2 className="text-xl font-medium mb-8 text-center">Create your CompShare Account</h2>
 
       <div className="mb-4">
-        <input id="username" ref={usernameRef}
+        <input ref={usernameRef} id="username"
           placeholder="Username"
           className="shadow border border-gray-300 rounded-xl w-full py-2 px-3 font-light placeholder:font-light"
         />
       </div>
       <div className="mb-4">
-        <input id="password" type="password" placeholder="Password" ref={passwordRef}
+        <input ref={emailRef} id="email" type="email" placeholder="Email" 
+          className="shadow border border-gray-300 rounded-xl w-full py-2 px-3 font-light placeholder:font-light"
+        />
+      </div>
+      <div className="mb-4">
+        <input ref={passwordRef} id="password" type="password" placeholder="Password" 
           className="shadow border border-gray-300 rounded-xl w-full py-2 px-3 font-light placeholder:font-light"
         />
       </div>
       <div className="mb-10">
-        <input id="confirmPassword" type="password" placeholder="Confirm Password" ref={pwConfirmRef}
+        <input ref={pwConfirmRef} id="confirmPassword" type="password" placeholder="Confirm Password" 
+          onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
           className="shadow border border-gray-300 rounded-xl w-full py-2 px-3 font-light placeholder:font-light"
         />
       </div>
@@ -70,7 +84,7 @@ function SignupForm({ toLogin }: LoginFormProps) {
       )}
 
       <button onClick={handleSignup}
-        className="block w-full text-center font-medium bg-sky-600 text-white rounded-4xl py-2 hover:bg-sky-700 transition mb-4"
+        className="block w-full text-center font-medium bg-sky-600 text-white rounded-4xl py-2 hover:bg-sky-700 transition mb-4 hover:cursor-pointer"
       >
         Sign up
       </button>

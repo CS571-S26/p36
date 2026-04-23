@@ -1,37 +1,38 @@
-import { Heart, MessageCircle, User } from "lucide-react";
+import { Heart, MessageCircle, User, Bookmark } from "lucide-react";
 import { CompBoard, HexagonFrame } from "./comps/Board";
+import { Pagination } from "./shared";
 import { frameColor } from "../utils/frameColor";
 import { DateTime } from "luxon";
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { postComment } from "../api/posts";
+import { useAuth } from './contexts/AuthContext';
+import { postComment, toggleLike, toggleBookmark } from "../api/posts";
+import type { CompSpec } from "../types";
+/**
+ * TODO: fix heartCount
+ */
 
 export const Post = ({
   compSpec,
   activeCompId,
+  basePath = "/comps",
 }: {
-  compSpec: {
-    _id: string;
-    title: string;
-    username: string;
-    champions: { championName: string; championImg: string; cost: number }[];
-    tips: string;
-    howToTransition: string;
-    createdAt: string;
-    heartCount: number;
-    commentCount: number;
-    comments: { _id: string; username: string; content: string; createdAt: string }[];
-  };
+  compSpec: CompSpec;
   activeCompId: string | null;
+  basePath?: string;
 }) => {
   const COMMENTS_PER_PAGE = 5;
   const champions = compSpec.champions;
+  const { user } = useAuth();
 
   const [expanded, setExpanded] = useState(activeCompId === compSpec._id);
   const [comments, setComments] = useState(compSpec.comments);
   const [commentCount, setCommentCount] = useState(compSpec.commentCount);
   const [currentCommentPg, setCurrentCommentPg] = useState(1);
+  const [heartCount, setHeartCount] = useState(compSpec.heartCount);
+  const [liked, setLiked] = useState(compSpec.liked ?? false);
+  const [bookmarked, setBookmarked] = useState(compSpec.bookmarked ?? false);
   
   const navigate = useNavigate();
   const commentRef = useRef<HTMLTextAreaElement>(null);
@@ -40,19 +41,39 @@ export const Post = ({
     setExpanded(activeCompId === compSpec._id);
   }, [activeCompId, compSpec._id]);
 
+  useEffect(() => {
+    setLiked(compSpec.liked);
+    setHeartCount(compSpec.heartCount);
+    setBookmarked(compSpec.bookmarked);
+  }, [compSpec.liked, compSpec.heartCount, compSpec.bookmarked])
+
   const handleToggle = () => {
     const next = !expanded;
-    navigate(next ? `/comps/${compSpec._id}` : "/comps");
+    navigate(next ? `${basePath}/${compSpec._id}` : basePath);
     setExpanded(next);
   };
 
+  const handleLike = async () => {
+    if (!user) return;
+    const { liked: newLiked } = await toggleLike(compSpec._id, user.username, user.token);
+    setLiked(newLiked);
+    setHeartCount(prev => newLiked ? prev + 1 : prev - 1);
+  };
+
+  const handleBookmark = async () => {
+    if (!user) return;
+    const { bookmarked: newBookmarked } = await toggleBookmark(compSpec._id, user.username, user.token);
+    setBookmarked(newBookmarked);
+  }
+
   const addComment = async () => {
     const content = commentRef.current?.value.trim();
-    if (!content) return;
+    if (!content || !user) return;
 
-    const updatedComments = await postComment(compSpec._id, 'tmdco', content); // TODO: replace with auth user
+    const updatedComments = await postComment(compSpec._id, user.username, content, user.token);
     setComments(updatedComments);
     setCommentCount(prev => prev + 1);
+    setCurrentCommentPg(Math.ceil(updatedComments.length / COMMENTS_PER_PAGE));
 
     if (commentRef.current) {
       commentRef.current.value = '';
@@ -65,10 +86,9 @@ export const Post = ({
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="border border-2 border-gray-100 bg-white shadow-xl rounded-2xl p-6 hover:border-blue-200">
+      <div className="border border-2 border-gray-100 bg-white shadow-xl rounded-2xl p-4 hover:border-blue-200">
         <div
-          className="flex justify-between hover:cursor-pointer"
-          onClick={handleToggle}
+          className="flex justify-between"
         >
           <div>
             <h3 className="font-bold text-lg">{compSpec.title}</h3>
@@ -77,32 +97,46 @@ export const Post = ({
             </p>
           </div>
           <div className="flex gap-4 font-normal">
-            <span className="flex gap-2">
-              <Heart />
-              {compSpec.heartCount}
+
+            <span 
+              className={`flex gap-2 items-center ${user ? "hover:cursor-pointer" : ""}`}
+              onClick={handleLike}
+            >
+              <Heart className={liked ? "fill-red-500 stroke-red-500" : ""} />
+              {heartCount}
             </span>
 
-            <span className="flex gap-2">
+            <span className="flex gap-2 items-center">
               <MessageCircle />
-              {compSpec.commentCount}
+              {commentCount}
             </span>
+
+            {user && user.username !== compSpec.username &&
+              <span 
+                className={"flex gap-2 items-center hover:cursor-pointer"}
+                onClick={handleBookmark}
+              >
+                <Bookmark className={bookmarked ? "fill-amber-400 stroke-amber-400" : ""} />
+              </span>
+            }
+
           </div>
         </div>
         <div className="border-t border-gray-300 mt-3">
-          <div className="flex justify-center p-4">
+          <div className="flex justify-center mt-4 hover:cursor-pointer" onClick={handleToggle}>
             {champions.map((champion, i) => (
               <HexagonFrame
                 key={i}
                 src={champion.championImg}
                 alt={champion.championName}
-                frameColor={frameColor(champion.cost)}
+                color={frameColor(champion.cost)}
               />
             ))}
           </div>
         </div>
 
         {expanded && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 mt-4">
             {/* Tips */}
             <div className="flex flex-col gap-2 p-4 items-center rounded-xl border border-2 border-gray-300 border-xl">
               <h3 className="text-sm font-bold">Tips</h3>
@@ -113,7 +147,7 @@ export const Post = ({
             <div className="flex flex-col gap-4 items-center justify-center rounded-xl border border-2 border-gray-300 p-4">
               <h3 className="text-sm font-bold">Board Positioning</h3>
               <div className="mb-2">
-                <CompBoard />
+                <CompBoard champions={compSpec.champions} />
               </div>
             </div>
 
@@ -142,20 +176,32 @@ export const Post = ({
                 </button>
               </div>
               <div className="space-y-2">
-                {comments.map((comment) => (
-                  <div 
-                    key={comment._id}
-                    className="bg-gray-50 border border-gray-200 rounded-xl p-4"
-                  >
-                    <div className="flex items-center gap-2 font-bold text-sm mb-2">
-                      <User size={16}/>
-                      {comment.username}
-                      <p className="text-gray-500 text-xs font-normal">{comment.createdAt.slice(0, 10)}</p>
+                {comments
+                  .slice(
+                    (currentCommentPg - 1) * COMMENTS_PER_PAGE,
+                    currentCommentPg * COMMENTS_PER_PAGE
+                  )
+                  .map((comment) => (
+                    <div 
+                      key={comment._id}
+                      className="bg-gray-50 border border-gray-300 rounded-xl p-4"
+                    >
+                      <div className="flex items-center gap-2 font-bold text-sm mb-2">
+                        <User size={16}/>
+                        {comment.username}
+                        <p className="text-gray-500 text-xs font-normal">{comment.createdAt.slice(0, 10)}</p>
+                      </div>
+                      <p className="text-sm font-light">{comment.content}</p>
                     </div>
-                    <p className="text-sm font-light">{comment.content}</p>
-                  </div>
-                ))}
+                  ))}
               </div>
+
+              {/* Pagination */}
+              <Pagination 
+                currentPage={currentCommentPg}
+                totalPages={Math.ceil(comments.length / COMMENTS_PER_PAGE)}
+                onPageChange={setCurrentCommentPg}
+              />
             </div>
           </div>
         )}

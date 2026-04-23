@@ -5,7 +5,7 @@ export interface IComp extends Document {
   username: string;
   champions: {
     championName: string;
-    championImg: string;
+    position?: { row: number; col: number };
   }[];
   tips: string;
   howToTransition: string;
@@ -26,6 +26,10 @@ const CompSchema = new Schema<IComp>(
       {
         _id: false,
         championName: { type: String, required: true },
+        position: {
+          row: { type: Number, min: 0, max: 3 },
+          col: { type: Number, min: 0, max: 6 },
+        },
       },
     ],
     tips: { type: String, default: '' },

@@ -1,94 +1,181 @@
+import { useState, useEffect, useRef } from "react";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import puzzle from "../assets/puzzle.png";
-import { FeatureCard } from "../components/shared";
-import { Brain, Star, Lightbulb } from "lucide-react";
+import { getAllComps } from "../api/posts";
+import { CompBoard } from "../components/comps/Board";
+import { Heart, MessageCircle, ArrowUpRight, ArrowRight } from "lucide-react";
 
 function Home() {
 
-  const features = [
-    {
-      title: "Human Strategy, Not Just Stats",
-      caption: "Learn the reasoning behind every comp",
-      description: "Most TFT websites rely on win-rate statistics to define the meta. CompShare focuses on real player insight — strategies, explanations, and creative builds shared by the community.",
-      icon: Brain
-    },
-    {
-      title: "Community Reviews",
-      caption: "Real players, real feedback",
-      description: "See what other players think about a comp before trying it yourself. Read reviews, discuss item choices, and learn from real experiences instead of relying only on data.",
-      icon: Star
-    },
-    {
-      title: "Discover Creative Builds",
-      caption: "Innovation beyond the meta",
-      description: "Explore unique team compositions created by players experimenting with new ideas. CompShare helps you discover strategies that statistics sites might overlook.",
-      icon: Lightbulb
-    }
-  ]
+  // const features = [
+  //   {
+  //     title: "Human Strategy, Not Just Stats",
+  //     caption: "Learn the reasoning behind every comp",
+  //     description: "Most TFT websites rely on win-rate statistics to define the meta. CompShare focuses on real player insight — strategies, explanations, and creative builds shared by the community.",
+  //     icon: Brain
+  //   },
+  //   {
+  //     title: "Community Reviews",
+  //     caption: "Real players, real feedback",
+  //     description: "See what other players think about a comp before trying it yourself. Read reviews, discuss item choices, and learn from real experiences instead of relying only on data.",
+  //     icon: Star
+  //   },
+  //   {
+  //     title: "Discover Creative Builds",
+  //     caption: "Innovation beyond the meta",
+  //     description: "Explore unique team compositions created by players experimenting with new ideas. CompShare helps you discover strategies that statistics sites might overlook.",
+  //     icon: Lightbulb
+  //   }
+  // ]
+
+  const [topComps, setTopComps] = useState<any[]>([]);
+  const [compIdx, setCompIdx] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startInterval = (comps: any[]) => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCompIdx((prev) => (prev + 1) % comps.length);
+    }, 7500);
+  };
+
+  useEffect(() => {
+    getAllComps("mostLiked").then((data) => {
+      const sliced = data.slice(0, 3);
+      setTopComps(sliced);
+      startInterval(sliced);
+    });
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  const goTo = (i: number) => {
+    setCompIdx(i);
+    startInterval(topComps);
+  };
+
+  const current = topComps[compIdx];
 
   return (
     <div className="w-full min-h-screen">
-      <section className="bg-gradient-to-br from-amber-50 via-white to-sky-50 shadow">
-        <div className="max-w-6xl mx-auto px-8 py-30">
+      <section className="bg-white">
+        <div className="max-w-7xl mx-auto px-8 pt-12">
 
-          <div className="flex justify-between items-center">
-            <div className="flex flex-col">
-
-              <h1 className="text-7xl font-extrabold">
-                Discover
-                  <span className="block w-fit my-4 bg-gradient-to-r from-amber-400 to-sky-700 bg-clip-text text-transparent">
-                    Creative
-                  </span>
-                TFT Comps
-              </h1>
-
-              <p className="mt-6 text-xl text-gray-600 font-medium">
-                Build comps, share with the community, and shape the meta.
-              </p>
-
-              <div className="flex gap-4 mt-6 items-center">
-
-                <Link to="/build-comp" className="w-fit rounded-2xl bg-amber-400 text-white font-medium px-6 py-4 hover:bg-amber-500">
-                  Start Building
-                </Link>
-
-                <Link to="/comps" className="w-fit rounded-2xl border-2 border-gray-300 font-medium px-6 py-4 hover:border-gray-400">
-                  View Comps
-                </Link>
-
-              </div>
-
-            </div>
-
-            <img src={puzzle} alt="Image of penguin in puzzle" className="max-w-md"/>
+          <div className="flex flex-col justify-center items-center">
+            <motion.h1 
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold max-w-3xl mx-auto text-center text-[#0B2026]"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.05 }}
+            >
+              Comps that make {" "}
+              <span className="text-amber-400">creativity</span> your biggest advantage.
+            </motion.h1>
+            <motion.p 
+              className="mt-6 text-lg md:text-xl text-gray-500 text-center font-medium"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.25 }}
+            >
+              Not tier lists. Not win-rate scrapes. Comps by real players.
+            </motion.p>
           </div>
 
+          <div className="w-full flex flex-col py-12">
+              {topComps.length > 0 && (
+                <>
+                  <span className="inline-flex w-fit rounded-full px-2 py-0.5 bg-sky-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold uppercase mb-2">
+                    Top 3 Trending
+                  </span>
+
+                  <motion.div
+                    key={`header-${compIdx}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4"
+                  >
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#0B2026]">
+                      {current.title}
+                      <span className="ml-3 text-base text-gray-500 font-medium">
+                        by @{current.username}
+                      </span>
+                    </h2>
+
+                    <div className="flex items-center gap-5 text-sm text-gray-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Heart className="w-4 h-4" />
+                        {current.heartCount}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MessageCircle className="w-4 h-4" />
+                        {current.commentCount}
+                      </span>
+                      <Link
+                        to={`/comps/${current._id}`}
+                        className="inline-flex items-center gap-1.5 text-amber-400 font-bold"
+                      >
+                        View comp
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+
+                  </motion.div>
+
+                  <motion.div
+                    key={compIdx}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  >
+                    <CompBoard champions={current.champions} />
+                  </motion.div>
+
+                  <div className="flex items-center justify-center gap-3 mt-10">
+                    {topComps.map((_, i) => (
+                      <motion.button
+                        key={i}
+                        onClick={() => goTo(i)}
+                        className={`relative overflow-hidden h-2 rounded-full hover:cursor-pointer ${
+                          i === compIdx ? "bg-gray-600/15" : "bg-gray-600 hover:bg-gray-400"
+                        }`}
+                        animate={{ width: i === compIdx ? "4rem" : "0.5rem" }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {i === compIdx && (
+                          <motion.div
+                            className="absolute inset-y-0 left-0 rounded-full bg-amber-400"
+                            initial={{ width: "0%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 7.5, ease: "linear" }}
+                          />
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="flex flex-wrap mt-14 items-center justify-center gap-4">
+                <Link
+                  to="/build-comp"
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-400 font-bold px-7 py-4 hover:bg-amber-300"
+                >
+                  Start Building
+                  <ArrowRight className="w-4 h-4"/>
+                </Link>
+                <Link
+                  to="/comps"
+                  className="font-semibold px-5 py-4"
+                >
+                  Browse all comps
+                </Link>
+              </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-8 relative">
+      {/* Why Compshare */}
+      <section className="bg-[#0B2026]">
 
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">
-              Why <span className="bg-gradient-to-r from-amber-400 to-sky-700 text-transparent bg-clip-text">
-                CompShare
-              </span>?
-            </h2>
-
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto font-medium">
-              Discover TFT strategies powered by real players. Learn the reasoning behind every comp and explore creative builds from the community.
-            </p>
-          </div>
-          
-          <div className="max-w-6xl mx-auto grid sm:grid-cols-1 md:grid-cols-3 gap-6 px-8 py-12">
-            {features.map((feature) => (
-                <FeatureCard key={feature.title} feature={feature}/>
-            ))}
-
-          </div>
-
-        </div>
       </section>
     </div>
   );

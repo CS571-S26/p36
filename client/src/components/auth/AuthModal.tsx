@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm"
 
-type AuthModalProps = {
-  open: boolean;
-  onClose: () => void;
-};
-
-function AuthModal({ open, onClose }: AuthModalProps) {
+function AuthModal({ open, onClose }: { open: boolean, onClose: () => void }) {
   const [mode, setMode] = useState("login");
+
+  useEffect(() => {
+    if (!open) setMode("login");
+  }, [open]);
 
   if (!open) return null;
 
   return (
     <div 
-      className="fixed inset-0 bg-black/40 flex items-center justify-center"
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
@@ -23,9 +22,9 @@ function AuthModal({ open, onClose }: AuthModalProps) {
       >
 
         {mode === "login" ? (
-          <LoginForm toSignUp={() => setMode("signup")} />
+          <LoginForm toSignUp={() => setMode("signup")} onClose={onClose}/>
         ) : (
-          <SignupForm toLogin={() => setMode("login")} />
+          <SignupForm toLogin={() => setMode("login")} onClose={onClose}/>
         )}
 
       </div>
