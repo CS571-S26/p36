@@ -1,4 +1,4 @@
-**[Please use this link to access the website.](https://tft-compshare.vercel.app/)**
+**[Please use this link to access the website.](https://compshare.app/)**
 
 # TFT Comp Share
 
