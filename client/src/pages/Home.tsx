@@ -67,7 +67,7 @@ function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut", delay: 0.05 }}
             >
-              Comps that make {" "}
+              TFT comps that make {" "}
               <span className="text-amber-400">creativity</span> your biggest advantage.
             </motion.h1>
             <motion.p 
@@ -83,43 +83,45 @@ function Home() {
           <div className="w-full flex flex-col py-12">
               {topComps.length > 0 && (
                 <>
-                  <span className="inline-flex w-fit rounded-full px-2 py-0.5 bg-sky-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold uppercase mb-2">
-                    Top 3 Trending
-                  </span>
+                  <div className="mx-auto w-full max-w-4xl">
+                    <span className="inline-flex w-fit rounded-full px-2 py-0.5 bg-sky-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold uppercase mb-2">
+                      Top 3 Trending
+                    </span>
 
-                  <motion.div
-                    key={`header-${compIdx}`}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4"
-                  >
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#0B2026]">
-                      {current.title}
-                      <span className="ml-3 text-base text-gray-500 font-medium">
-                        by @{current.username}
-                      </span>
-                    </h2>
+                    <motion.div
+                      key={`header-${compIdx}`}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="flex w-full flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between"
+                    >
+                      <h2 className="text-2xl md:text-3xl font-bold text-[#0B2026]">
+                        {current.title}
+                        <span className="ml-3 text-base text-gray-500 font-medium">
+                          by @{current.username}
+                        </span>
+                      </h2>
 
-                    <div className="flex items-center gap-5 text-sm text-gray-500">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Heart className="w-4 h-4" />
-                        {current.heartCount}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <MessageCircle className="w-4 h-4" />
-                        {current.commentCount}
-                      </span>
-                      <Link
-                        to={`/comps/${current._id}`}
-                        className="inline-flex items-center gap-1.5 text-amber-400 font-bold"
-                      >
-                        View comp
-                        <ArrowUpRight className="w-4 h-4" />
-                      </Link>
-                    </div>
+                      <div className="flex items-center gap-5 text-sm text-gray-500">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Heart className="w-4 h-4" />
+                          {current.heartCount}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <MessageCircle className="w-4 h-4" />
+                          {current.commentCount}
+                        </span>
+                        <Link
+                          to={`/comps/${current._id}`}
+                          className="inline-flex items-center gap-1.5 text-amber-400 font-bold"
+                        >
+                          View comp
+                          <ArrowUpRight className="w-4 h-4" />
+                        </Link>
+                      </div>
 
-                  </motion.div>
+                    </motion.div>
+                  </div>
 
                   <motion.div
                     key={compIdx}

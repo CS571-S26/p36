@@ -17,7 +17,7 @@ export default function Bookmarks() {
   if (!user) return null;
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-4 pb-24">
       {comps.map((comp: any) => (
         <Post key={comp._id} compSpec={comp} activeCompId={compId ?? null} basePath={`/users/${user.username}/bookmarks`} />
       ))}

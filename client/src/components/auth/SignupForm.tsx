@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { registerUser } from "../../api/auth";
 
-function SignupForm({ toLogin, onClose }: { toLogin: () => void; onClose: () => void; }) {
+function SignupForm({ toLogin, onClose, redirectOnAuth = true }: {
+  toLogin: () => void;
+  onClose: () => void;
+  redirectOnAuth?: boolean;
+}) {
   const navigate = useNavigate();
   const usernameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -44,7 +48,7 @@ function SignupForm({ toLogin, onClose }: { toLogin: () => void; onClose: () => 
       setError("");
       login(data.username, data.token);
       onClose();
-      navigate("/");
+      if (redirectOnAuth) navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.message || "Signup failed.");
     }

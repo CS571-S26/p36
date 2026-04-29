@@ -26,6 +26,26 @@ export const getMyComps = async (username: string, token: string) => {
   return data;
 }
 
+export const createComp = async (
+  username: string,
+  token: string,
+  comp: {
+    title: string;
+    champions: {
+      championName: string;
+      position?: { row: number; col: number };
+    }[];
+    tips: string;
+    howToTransition: string;
+  }
+) => {
+  const { data } = await axios.post(`${API_URL}/users/${username}/mycomps`,
+    comp,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return data;
+}
+
 export const getBookmarks = async (username: string, token: string) => {
   const [{ data: comps }, { data: likedComps }] = await Promise.all([
     axios.get(`${API_URL}/users/${username}/bookmarks`, { headers: { Authorization: `Bearer ${token}` } }),

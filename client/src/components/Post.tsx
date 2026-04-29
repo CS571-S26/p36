@@ -7,6 +7,7 @@ import { DateTime } from "luxon";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from './contexts/AuthContext';
+import AuthModal from "./auth/AuthModal";
 import { postComment, toggleLike, toggleBookmark } from "../api/posts";
 import type { CompSpec } from "../types";
 /**
@@ -33,6 +34,9 @@ export const Post = ({
   const [heartCount, setHeartCount] = useState(compSpec.heartCount);
   const [liked, setLiked] = useState(compSpec.liked ?? false);
   const [bookmarked, setBookmarked] = useState(compSpec.bookmarked ?? false);
+  const [openAuth, setOpenAuth] = useState(false);
+  const [focusComment, setFocusComment] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
   
   const navigate = useNavigate();
   const commentRef = useRef<HTMLTextAreaElement>(null);
@@ -47,14 +51,34 @@ export const Post = ({
     setBookmarked(compSpec.bookmarked);
   }, [compSpec.liked, compSpec.heartCount, compSpec.bookmarked])
 
+  useEffect(() => {
+    if (!expanded || !focusComment) return;
+
+    commentRef.current?.focus();
+    setFocusComment(false);
+  }, [expanded, focusComment]);
+
   const handleToggle = () => {
     const next = !expanded;
     navigate(next ? `${basePath}/${compSpec._id}` : basePath);
     setExpanded(next);
   };
 
+  const handleCommentClick = () => {
+    if (!expanded) {
+      navigate(`${basePath}/${compSpec._id}`);
+      setExpanded(true);
+    }
+
+    setFocusComment(true);
+  };
+
   const handleLike = async () => {
-    if (!user) return;
+    if (!user) {
+      setOpenAuth(true);
+      return;
+    }
+
     const { liked: newLiked } = await toggleLike(compSpec._id, user.username, user.token);
     setLiked(newLiked);
     setHeartCount(prev => newLiked ? prev + 1 : prev - 1);
@@ -67,17 +91,20 @@ export const Post = ({
   }
 
   const addComment = async () => {
-    const content = commentRef.current?.value.trim();
-    if (!content || !user) return;
+    const content = commentInput.trim();
+    if (!content) return;
+
+    if (!user) {
+      setOpenAuth(true);
+      return;
+    }
 
     const updatedComments = await postComment(compSpec._id, user.username, content, user.token);
     setComments(updatedComments);
     setCommentCount(prev => prev + 1);
     setCurrentCommentPg(Math.ceil(updatedComments.length / COMMENTS_PER_PAGE));
 
-    if (commentRef.current) {
-      commentRef.current.value = '';
-    }
+    setCommentInput("");
   };
 
   const formatDate = (dateStr: string) => {
@@ -85,8 +112,9 @@ export const Post = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="border border-2 border-gray-100 bg-white shadow-xl rounded-2xl p-4 hover:border-blue-200">
+    <>
+      <div className="max-w-5xl mx-auto">
+        <div className="border border-2 border-gray-100 bg-white shadow-xl rounded-2xl p-4 hover:border-blue-200">
         <div
           className="flex justify-between"
         >
@@ -99,14 +127,17 @@ export const Post = ({
           <div className="flex gap-4 font-normal">
 
             <span 
-              className={`flex gap-2 items-center ${user ? "hover:cursor-pointer" : ""}`}
+              className="flex gap-2 items-center hover:cursor-pointer"
               onClick={handleLike}
             >
               <Heart className={liked ? "fill-red-500 stroke-red-500" : ""} />
               {heartCount}
             </span>
 
-            <span className="flex gap-2 items-center">
+            <span
+              className="flex gap-2 items-center hover:cursor-pointer"
+              onClick={handleCommentClick}
+            >
               <MessageCircle />
               {commentCount}
             </span>
@@ -165,11 +196,18 @@ export const Post = ({
               <div className="flex gap-8 mb-4">
                 <textarea
                   ref={commentRef}
+                  value={commentInput}
+                  onChange={e => setCommentInput(e.target.value)}
                   className="w-full border border-gray-300 rounded-xl p-2 text-sm font-light focus:outline-none"
                   placeholder="Share your thoughts or ask questions..."
                 />
                 <button
-                  className="text-[#0084D1] text-sm font-bold mr-2 hover:cursor-pointer"
+                  disabled={!commentInput.trim()}
+                  className={`text-sm font-bold mr-2 ${
+                    commentInput.trim()
+                      ? "text-[#0084D1] hover:cursor-pointer"
+                      : "text-gray-300"
+                  }`}
                   onClick={addComment}
                 >
                   Post
@@ -205,7 +243,14 @@ export const Post = ({
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+
+      <AuthModal
+        open={openAuth}
+        onClose={() => setOpenAuth(false)}
+        redirectOnAuth={false}
+      />
+    </>
   );
 };

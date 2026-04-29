@@ -5,6 +5,12 @@ export type Champion = {
   position?: { row: number; col: number };
 };
 
+export type Item = {
+  itemName: string;
+  itemImg: string;
+  position?: { row: number; col: number };
+};
+
 export type Comment = {
   _id: string;
   username: string;
@@ -34,6 +40,7 @@ export type BuilderBoardProps = {
   dragOverCell?: { row: number; col: number } | null;
   onDragOverCell?: (row: number, col: number) => void;
   onDragLeave?: () => void;
+  onDragEnd?: () => void;
 };
 
 export type BoardProps = BuilderBoardProps & {

@@ -16,7 +16,7 @@ export default function AllComps() {
   }, [sort, user]);
 
   return (
-    <div className="mt-8 space-y-4 ">
+    <div className="mt-8 space-y-4 pb-24">
       <div className="flex justify-end max-w-5xl mx-auto relative">
         <button
           className="rounded-full border border-2 border-gray-300 px-4 py-2 text-sm text-gray-700 font-bold hover:cursor-pointer hover:border-gray-400"

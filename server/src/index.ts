@@ -1,9 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
-import { syncChampions } from './services/ddragon';
+import { syncAll } from './services/ddragon';
 import championRoutes from './routes/champions';
-import compRoutes from './routes/posts';
+import itemRoutes from './routes/items';
+import compRoutes from './routes/comps';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import cors from 'cors';
@@ -19,13 +20,14 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api/champions', championRoutes);
+app.use('/api/items', itemRoutes);
 app.use('/api/comps', compRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 
 const start = async () => {
   await connectDB(); // connects to db before running server
-  await syncChampions();
+  await syncAll();
 
   app.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);

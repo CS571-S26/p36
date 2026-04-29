@@ -3,7 +3,11 @@ import { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { loginUser } from "../../api/auth";
 
-function LoginForm({ toSignUp, onClose }: { toSignUp: () => void; onClose: () => void; }) {
+function LoginForm({ toSignUp, onClose, redirectOnAuth = true }: {
+  toSignUp: () => void;
+  onClose: () => void;
+  redirectOnAuth?: boolean;
+}) {
   const navigate = useNavigate();
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -25,7 +29,7 @@ function LoginForm({ toSignUp, onClose }: { toSignUp: () => void; onClose: () =>
       setError("");
       login(data.username, data.token);
       onClose();
-      navigate("/");
+      if (redirectOnAuth) navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed.");
     }

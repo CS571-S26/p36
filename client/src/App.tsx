@@ -19,7 +19,7 @@ function App() {
         <Route path='/users/:username/mycomps' element={<MyComps />} />
         <Route path='/users/:username/mycomps/:compId' element={<MyComps />} />
         <Route path='/users/:username/bookmarks' element={<Bookmarks />} />
-        <Route path='/users/:username/bookmarks/:compId' element={<MyComps />} />
+        <Route path='/users/:username/bookmarks/:compId' element={<Bookmarks />} />
       </Routes>
     </div>
   )

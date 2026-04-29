@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm"
 
-function AuthModal({ open, onClose }: { open: boolean, onClose: () => void }) {
+function AuthModal({ open, onClose, redirectOnAuth = true }: {
+  open: boolean;
+  onClose: () => void;
+  redirectOnAuth?: boolean;
+}) {
   const [mode, setMode] = useState("login");
 
   useEffect(() => {
@@ -22,9 +26,17 @@ function AuthModal({ open, onClose }: { open: boolean, onClose: () => void }) {
       >
 
         {mode === "login" ? (
-          <LoginForm toSignUp={() => setMode("signup")} onClose={onClose}/>
+          <LoginForm
+            toSignUp={() => setMode("signup")}
+            onClose={onClose}
+            redirectOnAuth={redirectOnAuth}
+          />
         ) : (
-          <SignupForm toLogin={() => setMode("login")} onClose={onClose}/>
+          <SignupForm
+            toLogin={() => setMode("login")}
+            onClose={onClose}
+            redirectOnAuth={redirectOnAuth}
+          />
         )}
 
       </div>
