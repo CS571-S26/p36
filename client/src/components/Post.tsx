@@ -34,12 +34,14 @@ export const Post = ({
   const [heartCount, setHeartCount] = useState(compSpec.heartCount);
   const [liked, setLiked] = useState(compSpec.liked ?? false);
   const [bookmarked, setBookmarked] = useState(compSpec.bookmarked ?? false);
+  const [likePending, setLikePending] = useState(false);
   const [openAuth, setOpenAuth] = useState(false);
   const [focusComment, setFocusComment] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   
   const navigate = useNavigate();
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  const likePendingRef = useRef(false);
 
   useEffect(() => {
     setExpanded(activeCompId === compSpec._id);
@@ -79,9 +81,37 @@ export const Post = ({
       return;
     }
 
-    const { liked: newLiked } = await toggleLike(compSpec._id, user.username, user.token);
-    setLiked(newLiked);
-    setHeartCount(prev => newLiked ? prev + 1 : prev - 1);
+    if (likePendingRef.current) return;
+
+    likePendingRef.current = true;
+    setLikePending(true);
+
+    const previousLiked = liked;
+    const previousHeartCount = heartCount;
+    const nextLiked = !liked;
+
+    setLiked(nextLiked);
+    setHeartCount(prev => prev + (nextLiked ? 1 : -1));
+
+    try {
+      const { liked: newLiked, heartCount: newHeartCount } = await toggleLike(
+        compSpec._id,
+        user.username,
+        user.token
+      );
+      setLiked(newLiked);
+      setHeartCount(
+        typeof newHeartCount === "number"
+          ? newHeartCount
+          : previousHeartCount + (newLiked ? 1 : -1)
+      );
+    } catch {
+      setLiked(previousLiked);
+      setHeartCount(previousHeartCount);
+    } finally {
+      likePendingRef.current = false;
+      setLikePending(false);
+    }
   };
 
   const handleBookmark = async () => {
@@ -126,13 +156,17 @@ export const Post = ({
           </div>
           <div className="flex gap-4 font-normal">
 
-            <span 
-              className="flex gap-2 items-center hover:cursor-pointer"
+            <button
+              type="button"
+              className={`flex gap-2 items-center ${
+                likePending ? "" : "hover:cursor-pointer"
+              }`}
+              disabled={likePending}
               onClick={handleLike}
             >
               <Heart className={liked ? "fill-red-500 stroke-red-500" : ""} />
               {heartCount}
-            </span>
+            </button>
 
             <span
               className="flex gap-2 items-center hover:cursor-pointer"
