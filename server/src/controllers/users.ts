@@ -136,23 +136,41 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
   try {
     const username = req.params.username as string;
     const compId = req.params.compId as string;
+    const postId = new mongoose.Types.ObjectId(compId);
 
     const user = await User.findOne({ username } as any);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const alreadyLiked = user.likedPosts.some(p => p.postId.toString() === compId);
-    if (alreadyLiked) {
-      user.likedPosts = user.likedPosts.filter(p => p.postId.toString() !== compId);
-      await Comp.findByIdAndUpdate(compId, { $inc: { heartCount: -1 } });
-    } else {
-      user.likedPosts.push({ postId: new mongoose.Types.ObjectId(compId) });
-      await Comp.findByIdAndUpdate(compId, { $inc: { heartCount: 1 } });
+    const unlikeResult = await User.updateOne(
+      { username, 'likedPosts.postId': postId } as any,
+      { $pull: { likedPosts: { postId } } }
+    );
+
+    if (unlikeResult.modifiedCount > 0) {
+      const comp = await Comp.findByIdAndUpdate(
+        compId,
+        { $inc: { heartCount: -1 } },
+        { returnDocument: 'after' }
+      );
+      return res.json({ liked: false, heartCount: comp?.heartCount ?? 0 });
     }
 
-    await user.save();
-    res.json({ liked: !alreadyLiked });
+    const likeResult = await User.updateOne(
+      { username, 'likedPosts.postId': { $ne: postId } } as any,
+      { $addToSet: { likedPosts: { postId } } }
+    );
+
+    const comp = likeResult.modifiedCount > 0
+      ? await Comp.findByIdAndUpdate(
+          compId,
+          { $inc: { heartCount: 1 } },
+          { returnDocument: 'after' }
+        )
+      : await Comp.findById(compId);
+
+    res.json({ liked: true, heartCount: comp?.heartCount ?? 0 });
   } catch (err) {
     res.status(500).json({ message: 'Failed to toggle like.' });
   }
